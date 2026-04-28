@@ -1,4 +1,3 @@
-// Smoke test for gvpy.py -- run: python3 gvpy.py smoke_test.vpy
 // Exercises literal pass-through, backtick expressions, control flow,
 // nested blocks, parameter, pp, generate/instantiate and timescale
 

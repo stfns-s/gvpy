@@ -1,0 +1,78 @@
+// Exercises literal pass-through, backtick expressions, control flow,
+// nested blocks, parameter, pp, generate/instantiate and timescale
+
+// (timescale|default_nettype|include|ifdef|if|ifndef|else|endif) do not need literals
+`timescale 1ps/1ps
+
+//;my $WIDTH = parameter(name=>"WIDTH", val=>8);
+//;my $DEPTH = parameter(name=>"DEPTH", val=>4);
+
+module `mname()` #(
+    parameter WIDTH = `$WIDTH`,
+    parameter DEPTH = `$DEPTH`
+) (
+    input  wire                  clk,
+    input  wire                  rst_n,
+    input  wire [`$WIDTH-1`:0]    data_in,
+    output reg  [`$WIDTH-1`:0]    data_out
+);
+
+    // Generated register bank
+//;foreach my $i (0..$DEPTH-1) {
+    reg [`$WIDTH-1`:0] stage_`pp($i)`; // variable i value:`$i` prety_printed: `pp($i, "%03d")`
+//;}
+
+    // Initial values, conditional on index parity
+//;foreach my $i (0..$DEPTH-1) {
+//;    if ($i % 2 == 0) {
+    initial stage_`pp($i)` = `$WIDTH`'h`pp(0xa0 + $i, "%02x")`;
+//;    } else {
+    initial stage_`pp($i)` = `$WIDTH`'h`pp(0x50 + $i, "%02x")`;
+//;    }
+//;}
+
+    // Pipeline shift
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+//;foreach my $i (0..$DEPTH-1) {
+            stage_`pp($i)` <= 0;
+//;}
+        end else begin
+            stage_0 <= data_in;
+//;foreach my $i (1..$DEPTH-1) {
+            stage_`pp($i)` <= stage_`pp($i-1)`;
+//;}
+            data_out <= stage_`pp($DEPTH-1)`;
+        end
+    end
+
+
+    // Sub-instances via generate + instantiate
+    // One submod per pipeline stage; alternating MODE shows kwargs flowing
+    // through to the /*PARAMS: ... */ banner that instantiate() emits.
+//;my @subs;
+//;foreach my $i (0..$DEPTH-1) {
+//;    push @subs, generate("submod", "u_sub_$i", WIDTH=>$WIDTH, STAGE=>$i, MODE=>($i % 2 == 0 ? "fast" : "slow"));
+//;}
+
+//;foreach my $s (@subs) {
+    `instantiate($s)` (
+        .clk   (clk),
+        .rst_n (rst_n),
+        .din   (stage_`pp($s->{params}->{STAGE})`),
+        .dout  ()
+    );
+//;}
+
+    // Same instance written by hand for contrast: hash access on the
+    // blessed instance (->{tname} / ->{iname} / ->{params}) instead of instantiate().
+//;my $sub = generate("submod", "u_sub_manual", WIDTH=>$WIDTH, MODE=>"fast");
+    `$sub->{tname}` /*WIDTH=`$sub->{params}->{WIDTH}` MODE=`$sub->{params}->{MODE}`*/ `$sub->{iname}` (
+        .clk(clk),
+        .rst_n(rst_n)
+    );
+
+    // Literal backtick passthrough
+    // escaped: \`not_an_expr\`
+
+endmodule

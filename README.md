@@ -1,6 +1,6 @@
 # gvpy
 
-Python-esque, minimalist port of Genesis2 hierarchical templating generator
+Minimalist port of Genesis2 hierarchical templating generator
 (see: https://github.com/StanfordVLSI/Genesis2)
 
 Two implementations live side by side:
@@ -17,6 +17,9 @@ Both produce identical output on language-neutral inputs (literal pass-through, 
 ```bash
 gvpy.py test.vpy
 gvpy.py --defparam WIDTH=32 --mname my_module test.vpy
+
+gvp.pl test.vp
+gvp.pl --defparam WIDTH=32 --mname my_module test.vp
 ```
 
 ## CLI
@@ -34,6 +37,8 @@ gvpy.py --defparam WIDTH=32 --mname my_module test.vpy
 Positional args are template files; multiple inputs are concatenated in order.
 
 ## Template syntax (gvpy.py)
+
+> **Perl variant (`gvp.pl`):** the template syntax is otherwise equivalent — the only difference is that Perl blocks have no indent guards. Use a plain `}` to close a `//;` block instead of a `//;# end` sentinel, and rely on Perl's brace-delimited control flow as usual.
 
 ### Literal text
 
@@ -254,18 +259,7 @@ Add a case by creating a new numbered subdirectory.
 
 ### Vim
 
-Syntax + ftdetect files for `.vpy` / `.gvpy` live in [`vim/`](vim/). Install:
-
-
-```bash
-mkdir -p ~/.vim/syntax ~/.vim/ftdetect
-cp vim/syntax/vpy.vim   ~/.vim/syntax/
-cp vim/ftdetect/vpy.vim ~/.vim/ftdetect/
-```
-
-Make sure your `.vimrc` (or `~/.vim/vimrc`) has `filetype plugin indent on` and `syntax on` so ftdetect runs and the syntax loads.
-
-The base syntax is [`verilog_systemverilog`](https://www.vim.org/scripts/script.php?script_id=4067) — install it first, or change the `ru!` line in `vim/syntax/vpy.vim` to `verilog` to fall back to vim's built-in.
+Syntax + ftdetect files for `.vpy` / `.gvpy` / `.vp` / `.gvp` live in [`vim/`](vim/). See [`vim/README.md`](vim/README.md) for installation and configuration details.
 
 ## Differences between gvpy.py and gvp.pl
 
