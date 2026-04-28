@@ -1,0 +1,2 @@
+//;my $a = 1; my $b = 2; my $c = 3;
+result: `$a` `$b` `$c` total `$a+$b+$c`

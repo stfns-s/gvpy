@@ -1,0 +1,2 @@
+  zero;
+  not_zero;

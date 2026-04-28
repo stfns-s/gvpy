@@ -1,0 +1,2 @@
+//;WIDTH = 16
+wire [`WIDTH-1`:0] bus;

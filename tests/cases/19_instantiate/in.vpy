@@ -1,0 +1,3 @@
+//;u = generate("Adder", "u_add", WIDTH=8)
+//;instantiate(u)
+;

@@ -1,0 +1,2 @@
+//;pinclude("helpers.pl")
+val = `dub(7)`

@@ -1,0 +1,1 @@
+result: 1 2 3 total 6
