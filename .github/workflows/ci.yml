@@ -11,6 +11,8 @@ jobs:
   test:
     # Ubuntu ships with a system Perl, so only Python needs an explicit setup step.
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       # Check out the repository contents into the runner workspace.
       - uses: actions/checkout@v4
