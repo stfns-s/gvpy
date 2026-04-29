@@ -1,6 +1,6 @@
 " Vim syntax file
-" Language: gvp Python template (.vpy / .gvpy)
-" Mirrors ~/.vim/syntax/genesis2.vim with @pythonTop in place of @perlTop,
+" Language: gvpy Python template (.vpy / .gvpy)
+" Mirrors syntax/genesis2.vim with @pythonTop in place of @perlTop,
 " plus two refinements: escape-aware backticks and Verilog-directive exclusion.
 
 if version < 600
@@ -25,11 +25,11 @@ syn include @pythonTop syntax/python.vim
 " //; # ... -- comment-only Python lines (block-closing sentinels like
 " `# end if`, `# endif`, `# end for`, `# endfor`). Highlighted as comments
 " but bold so they stand out as structural markers.
-syn match vpySentinel +//;\s*#.*$+ containedin=ALL
+syn match genesispySentinel +//;\s*#.*$+ containedin=ALL
 
 " //;<rest> -- the rest of the line is Python (excluding the sentinel form
 " above, which is matched separately).
-syn region vpyLine matchgroup=vpyDelim
+syn region genesispyLine matchgroup=genesispyDelim
     \ start=+//;\(\s*#\)\@!+ end=+$+
     \ keepend containedin=ALL contains=@pythonTop
 
@@ -38,37 +38,37 @@ syn region vpyLine matchgroup=vpyDelim
 "     escape (\`) does not open or close the region.
 "   * \@! after the start backtick excludes the Verilog `directive keywords
 "     so they are not mis-parsed as opening a Python region.
-syn region vpyInline matchgroup=vpyDelim
+syn region genesispyInline matchgroup=genesispyDelim
     \ start=#\\\@<!`\(timescale\|default_nettype\|include\|ifdef\|if\|ifndef\|else\|endif\)\@!#
     \ end=#\\\@<!`#
     \ keepend containedin=ALL contains=@pythonTop oneline
 
-hi link vpyDelim PreProc
+hi link genesispyDelim PreProc
 
 " Make embedded Python visually distinct from Verilog (which uses Statement).
-hi vpyPyKeyword  cterm=bold gui=bold ctermfg=magenta guifg=magenta
-hi vpyPyBuiltin  cterm=bold gui=bold
-hi vpyPyFunction cterm=bold gui=bold
-hi link pythonStatement   vpyPyKeyword
-hi link pythonConditional vpyPyKeyword
-hi link pythonRepeat      vpyPyKeyword
-hi link pythonOperator    vpyPyKeyword
-hi link pythonException   vpyPyKeyword
-hi link pythonInclude     vpyPyKeyword
-hi link pythonBuiltin     vpyPyBuiltin
-hi link pythonFunction    vpyPyFunction
-hi link pythonDecorator   vpyPyKeyword
+hi genesispyPyKeyword  cterm=bold gui=bold ctermfg=magenta guifg=magenta
+hi genesispyPyBuiltin  cterm=bold gui=bold
+hi genesispyPyFunction cterm=bold gui=bold
+hi link pythonStatement   genesispyPyKeyword
+hi link pythonConditional genesispyPyKeyword
+hi link pythonRepeat      genesispyPyKeyword
+hi link pythonOperator    genesispyPyKeyword
+hi link pythonException   genesispyPyKeyword
+hi link pythonInclude     genesispyPyKeyword
+hi link pythonBuiltin     genesispyPyBuiltin
+hi link pythonFunction    genesispyPyFunction
+hi link pythonDecorator   genesispyPyKeyword
 
 " Sentinel highlight: same foreground as Comment, but bold. We can't use
 " `:hi link` (it would clobber the bold attribute), so resolve Comment's
 " colours at load time and apply them explicitly.
 let s:_cterm_fg = synIDattr(synIDtrans(hlID('Comment')), 'fg', 'cterm')
 let s:_gui_fg   = synIDattr(synIDtrans(hlID('Comment')), 'fg', 'gui')
-exe 'hi vpySentinel cterm=bold gui=bold'
+exe 'hi genesispySentinel cterm=bold gui=bold'
     \ . (!empty(s:_cterm_fg) ? ' ctermfg=' . s:_cterm_fg : '')
     \ . (!empty(s:_gui_fg)   ? ' guifg='   . s:_gui_fg   : '')
 unlet s:_cterm_fg s:_gui_fg
 
-let b:current_syntax = "vpy"
+let b:current_syntax = "genesispy"
 
 " vim: set ts=4 sw=4:
