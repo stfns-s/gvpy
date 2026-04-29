@@ -43,9 +43,7 @@ initPerl();
 foreach my $f (@ARGV) { parseFile($f); }
 
 if ($rawperl) {
-	open(my $fh, "|-", "perltidy -l 140 -sbl -ce -i=4 -ci=4") or die "perltidy failed: $!";
-	print $fh $ExecPerl;
-	close($fh);
+	formatPerl($ExecPerl);
 } else {
 	my $r = eval $ExecPerl;
 
@@ -73,6 +71,17 @@ if ($rawperl) {
 }
 
 exit 0;
+
+sub formatPerl {
+    my $src = shift;
+    my $have_perltidy = system("command -v perltidy >/dev/null 2>&1") == 0;
+    if ($have_perltidy && open(my $fh, "|-", "perltidy -l 140 -sbl -ce -i=4 -ci=4")) {
+        print $fh $src;
+        close($fh) and return;
+    }
+    print STDERR "$prog: perltidy unavailable; emitting raw output\n";
+    print $src;
+}
 
 sub usage {
     my $prog     = basename($0);

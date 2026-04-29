@@ -15,6 +15,11 @@
 #   expected_err.<mode>                    -- substring stderr match
 #   expected_exit.<mode>                   -- integer exit code (default 0)
 #
+# Per-mode subdirectory:
+#   requires/<mode>                        -- whitespace-separated list of commands
+#                                             that must be on PATH; case is skipped
+#                                             for that mode if any are missing
+#
 # Usage: run_tests.sh [py|pl|both]   (default: both)
 
 set -u
@@ -67,6 +72,18 @@ run_case_mode() {
         skip_per[$mode]=$((skip_per[$mode] + 1))
         skips+=("$name[$mode]")
         return
+    fi
+
+    if [[ -f "$case_dir/requires/$mode" ]]; then
+        local req
+        for req in $(< "$case_dir/requires/$mode"); do
+            if ! command -v "$req" >/dev/null 2>&1; then
+                printf "SKIP  %s [%s] (missing: %s)\n" "$name" "$mode" "$req"
+                skip_per[$mode]=$((skip_per[$mode] + 1))
+                skips+=("$name[$mode]")
+                return
+            fi
+        done
     fi
 
     local -a args_arr

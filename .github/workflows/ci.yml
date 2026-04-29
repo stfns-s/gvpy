@@ -1,6 +1,6 @@
 name: CI
 
-# Trigger the workflow on pushes and pull requests targeting the main branch.
+# Run on pushes and PRs to main.
 on:
   push:
     branches: [main]
@@ -9,45 +9,53 @@ on:
 
 jobs:
   test:
-    # Ubuntu ships with a system Perl, so only Python needs an explicit setup step.
+    # Note:: Ubuntu ships perl; perltidy is installed alongside black.
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
-      # Check out the repository contents into the runner workspace.
       - uses: actions/checkout@v4
 
-      # Provision a pinned Python interpreter so results are reproducible
-      # across runner image updates.
+      # Pin Python for reproducibility across runner image updates.
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      # Best-effort: if a formatter fails to install, dependent cases skip
+      # via tests/cases/*/requires/<mode> instead of failing the job.
       - name: Install formatters
+        continue-on-error: true
         run: |
-          pip install black
-          sudo apt-get update && sudo apt-get install -y perltidy
+          python3 -m pip install --upgrade pip || true
+          python3 -m pip install black || true
+          sudo apt-get update && sudo apt-get install -y perltidy || true
 
-      # Show interpreter versions in the log to aid debugging
+      # Report tool versions; missing formatters are noted, not enforced.
       - name: Show tool versions
         run: |
           python3 --version
           perl --version | head -2
-          black --version
-          perltidy --version | head -1
+          if command -v black >/dev/null 2>&1; then
+              black --version
+          else
+              echo "black not installed (cases requiring it will skip)"
+          fi
+          if command -v perltidy >/dev/null 2>&1; then
+              perltidy --version | head -1
+          else
+              echo "perltidy not installed (cases requiring it will skip)"
+          fi
 
-      # Fail-fast: sanity-check the Perl core modules used by gvp.pl are importable
-      # before running the full suite — fails fast with a clear message.
+      # Fail fast if gvp.pl's core modules are missing.
       - name: Check Perl modules
         run: |
           perl -MFileHandle -MFile::Basename -MGetopt::Long -e 'print "perl modules OK\n"'
 
-      # Fail-fast: check for the standard-library modules used by gvp.py.
+      # Fail fast if gvp.py's stdlib modules are missing.
       - name: Check Python modules
         run: |
           python3 -c 'import argparse, os, re, subprocess, sys; print("python modules OK")'
 
-      # Run the shared tests against both implementations.
       - name: Run tests
         run: ./tests/run_tests.sh both
