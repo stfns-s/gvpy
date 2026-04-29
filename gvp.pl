@@ -5,7 +5,6 @@ use warnings;
 use FileHandle;
 use File::Basename;
 use Getopt::Long;
-use Data::Dumper;
 
 # globals
 my $prog     = basename($0);
