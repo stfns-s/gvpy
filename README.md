@@ -259,7 +259,11 @@ Add a case by creating a new numbered subdirectory.
 
 ### Vim
 
-Syntax + ftdetect files for `.vpy` / `.gvpy` / `.vp` / `.gvp` live in [`vim/`](vim/). See [`vim/README.md`](vim/README.md) for installation and configuration details.
+Syntax + ftdetect files for `.vpy` / `.gvpy` / `.vp` / `.gvp` live in [`extras/vim/`](extras/vim/). See [`extras/vim/README.md`](extras/vim/README.md) for installation and configuration details.
+
+### Emacs
+
+`genesis2-mode` for `.vp` / `.svp` / `.vph` (Genesis2 Perl-templated Verilog) lives in [`extras/emacs/`](extras/emacs/). See [`extras/emacs/README.md`](extras/emacs/README.md) for installation.
 
 ## Differences between gvpy.py and gvp.pl
 

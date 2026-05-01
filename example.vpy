@@ -20,7 +20,7 @@ module `mname()` #(
     // Generated register bank
 //;for i in range(DEPTH):
     reg [`WIDTH-1`:0] stage_`pp(i)`; // variable i value:`i` prety_printed: `pp(i, "%03d")`
-//;# end for
+//;#end for
 
     // Initial values, conditional on index parity
 //;for i in range(DEPTH):
@@ -28,20 +28,20 @@ module `mname()` #(
     initial stage_`pp(i)` = `WIDTH`'h`pp(0xa0 + i, "%02x")`;
 //;    else:
     initial stage_`pp(i)` = `WIDTH`'h`pp(0x50 + i, "%02x")`;
-//;    # end if
-//;# end for
+//;    #end if
+//;#end for
 
     // Pipeline shift
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
 //;for i in range(DEPTH):
             stage_`pp(i)` <= '0;
-//;# end for
+//;#end for
         end else begin
             stage_0 <= data_in;
 //;for i in range(1, DEPTH):
             stage_`pp(i)` <= stage_`pp(i-1)`;
-//;# endfor
+//;#endfor
             data_out <= stage_`pp(DEPTH-1)`;
         end
     end
@@ -53,7 +53,7 @@ module `mname()` #(
 //;subs = []
 //;for i in range(DEPTH):
 //;    subs.append(generate("submod", f"u_sub_{i}", WIDTH=WIDTH, STAGE=i, MODE=("fast" if i % 2 == 0 else "slow")))
-//;# end for
+//;#end for
 
 //;for s in subs:
     //;instantiate(s)
@@ -63,7 +63,7 @@ module `mname()` #(
         .din   (stage_`pp(s.params["STAGE"])`),
         .dout  ()
     );
-//;# end for
+//;#end for
 
     // Same instance written by hand for contrast: attribute access on the
     // _Inst wrapper (.tname / .iname / .params) instead of instantiate().
