@@ -25,7 +25,7 @@ incdirs = ["./"]
 defparams = {}
 exec_py = ""
 current_emit_indent = 0  # auto-tracked indent for emit() lines (Python is whitespace-sensitive)
-jinja2_mode = False
+j2_mode = False
 
 
 PRELUDE = r'''
@@ -97,7 +97,7 @@ def usage():
         f"    --defparam p=v    : Set parameter 'p' to value 'v'\n"
         f'    --comment str     : Set the comment start of output language to "str" (default "//").\n'
         f'                        Note that this also adds the gvp escape to "str"; (default "//;")\n'
-        f"    -j2, --jinja2     : Parse templates with Jinja2 delimiters: '{{% stmt %}}',\n"
+        f"    -j2, --j2         : Parse templates with Jinja2 delimiters: '{{% stmt %}}',\n"
         f"                        '{{{{ expr }}}}', '{{# comment #}}' (replaces //; and backticks)\n"
     )
 
@@ -191,8 +191,8 @@ def parse_file(fname, incl=False):
         current_emit_indent = 0
 
     try:
-        if jinja2_mode:
-            _parse_jinja2(fh.read(), fname)
+        if j2_mode:
+            _parse_j2(fh.read(), fname)
         else:
             _parse_genesis(fh, fname)
     finally:
@@ -369,7 +369,7 @@ def _emit_chain(pieces, indent_spaces):
     return f"{pad}{'; '.join(parts)}; emit('\\n')\n"
 
 
-def _parse_jinja2(source, path):
+def _parse_j2(source, path):
     global exec_py, current_emit_indent
 
     last_py_indent = 0
@@ -632,7 +632,7 @@ def pinclude_file(fn):
 
 
 def main():
-    global comment, PY_ESC, PY_ESC2, rawpython, mname_arg, libdirs, incdirs, defparams, jinja2_mode
+    global comment, PY_ESC, PY_ESC2, rawpython, mname_arg, libdirs, incdirs, defparams, j2_mode
 
     parser = argparse.ArgumentParser(prog=prog, add_help=False)
     parser.add_argument("-h", "--help", action="store_true")
@@ -642,7 +642,7 @@ def main():
     parser.add_argument("--rawpython", "--pdebug", action="store_true")
     parser.add_argument("--mname")
     parser.add_argument("--comment", default="//")
-    parser.add_argument("-j2", "--jinja2", action="store_true")
+    parser.add_argument("-j2", "--j2", action="store_true")
     parser.add_argument("files", nargs="*")
 
     try:
@@ -660,7 +660,7 @@ def main():
     PY_ESC2 = comment + ";" if comment != "//" else None
     rawpython = args.rawpython
     mname_arg = args.mname
-    jinja2_mode = args.jinja2
+    j2_mode = args.j2
 
     libdirs = []
     for entry in (args.libdirs or ["./"]):

@@ -2,11 +2,11 @@
 " Language: gvpy Python template (.vpy / .gvpy)
 " Mirrors syntax/genesis2.vim with @pythonTop in place of @perlTop,
 " plus two refinements: escape-aware backticks and Verilog-directive exclusion.
-" Also covers --jinja2 statement and comment delimiters ({% ... %}, {# ... #})
+" Also covers --j2 statement and comment delimiters ({% ... %}, {# ... #})
 " since the engine is per-run and the same source file can be elaborated either
 " way. The `{{ ... }}` expression form is intentionally NOT highlighted -- it
 " collides with Verilog brace patterns (nested concatenation, replication
-" closes); leaving it as plain Verilog avoids false regions in non-jinja2
+" closes); leaving it as plain Verilog avoids false regions in non-j2
 " sources.
 
 if version < 600
@@ -49,7 +49,7 @@ syn region genesispyInline matchgroup=genesispyDelim
     \ end=#\\\@<!`#
     \ keepend containedin=ALL contains=@pythonTop oneline
 
-" --jinja2 delimiters. Whitespace modifiers `{%-`, `-%}` are accepted
+" --j2 delimiters. Whitespace modifiers `{%-`, `-%}` are accepted
 " as a syntactic no-op. Either form may span multiple physical lines,
 " so no `oneline`.
 "

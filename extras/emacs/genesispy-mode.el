@@ -40,7 +40,7 @@
   `(("^[ \t]*//;[ \t]*#.*$" . 'genesispy-sentinel-face)
     ("//;\\(?:[^#]\\|$\\)" 0 'genesispy-delim-face t)
     ("`" . 'genesispy-delim-face)
-    ;; --jinja2 delimiters. The whitespace modifiers `{%-' / `-%}'
+    ;; --j2 delimiters. The whitespace modifiers `{%-' / `-%}'
     ;; are accepted by the parser as a syntactic no-op. The `{{ ... }}'
     ;; expression form is intentionally not highlighted -- it collides
     ;; with Verilog brace patterns (nested concatenation, replication

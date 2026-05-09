@@ -1,8 +1,8 @@
 // Exercises literal pass-through, \{{ expr }} expressions, control flow,
 // nested blocks, parameter, pp, generate/instantiate and timescale.
 //
-// Same template as example.vpy, written in --jinja2 syntax. Run with:
-//   gvpy.py --jinja2 example_j2.vpy
+// Same template as example.vpy, written in --j2 syntax. Run with:
+//   gvpy.py --j2 example_j2.vpy
 
 // (timescale|default_nettype|include|ifdef|if|ifndef|else|endif) do not need literals
 `timescale 1ps/1ps

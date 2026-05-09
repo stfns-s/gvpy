@@ -33,7 +33,7 @@ gvp.pl --defparam WIDTH=32 --mname my_module test.vp
 | `--libdirs d1,d2,...` | Prepended to `sys.path` before executing (repeatable, comma-split) |
 | `--comment STR` | Output-language comment prefix (default `//`); also enables `<STR>;` as an alternate escape |
 | `--rawpython` / `--pdebug` | Print generated Python source instead of executing (formatted with `black -l 140` if installed) |
-| `-j2`, `--jinja2` | Parse templates with Jinja2-shaped delimiters (see "Jinja2 syntax" below); python-only |
+| `-j2`, `--j2` | Parse templates with Jinja2-shaped delimiters (see "Jinja2 syntax" below); python-only |
 
 Positional args are template files; multiple inputs are concatenated in order.
 
@@ -117,11 +117,11 @@ Lines starting with `` `timescale ``, `` `ifdef ``, `` `ifndef ``, `` `else ``, 
 //;pinclude("helpers.py")    -- raw Python, pasted verbatim into the program
 ```
 
-## Jinja2 syntax (`--jinja2` / `-j2`, gvpy.py only)
+## Jinja2 syntax (`--j2` / `-j2`, gvpy.py only)
 
 Opt-in alternative spelling. Same semantics, different delimiters:
 
-| Genesis (default) | Jinja2 (`--jinja2`) |
+| Genesis (default) | Jinja2 (`--j2`) |
 |-------------------|---------------------|
 | `//; stmt`        | `{% stmt %}`        |
 | `` `expr` ``      | `{{ expr }}`        |
@@ -145,7 +145,7 @@ accepted but treated as a syntactic no-op.
 - `\{{` produces a literal `{{` in plain text.
 - `{% %}` and `{{ }}` may span multiple physical lines (string- and
   bracket-aware close scan).
-- The flag is global per invocation: `include()`d files inherit jinja2 mode.
+- The flag is global per invocation: `include()`d files inherit j2 mode.
 
 Example:
 
@@ -290,7 +290,7 @@ endmodule
 ```
 
 An example template covering most features lives in [`example.vpy`](example.vpy).
-The same template in `--jinja2` syntax is in [`example_j2.vpy`](example_j2.vpy).
+The same template in `--j2` syntax is in [`example_j2.vpy`](example_j2.vpy).
 
 ## Debugging
 
