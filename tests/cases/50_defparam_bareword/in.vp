@@ -1,0 +1,2 @@
+//;my $w = parameter(name=>"W", val=>"d");
+v=`$w`
