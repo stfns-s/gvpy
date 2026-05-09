@@ -6,6 +6,7 @@ inside backticks) and emits target-language source.
 """
 
 import argparse
+import ast
 import os
 import re
 import subprocess
@@ -134,7 +135,11 @@ def init_py():
         exec_py += f"sys.path.insert(0, {d!r})\n"
     exec_py += "parameters = {\n"
     for k, v in defparams.items():
-        exec_py += f'    "{k}": {v},\n'
+        try:
+            parsed = ast.literal_eval(v)
+        except (ValueError, SyntaxError):
+            parsed = v
+        exec_py += f"    {k!r}: {parsed!r},\n"
     exec_py += "}\n"
     exec_py += f"comment = {comment!r}\n"
     exec_py += PRELUDE
@@ -569,6 +574,14 @@ def _parse_jinja2(source, path):
 def include_file(fn):
     global exec_py
 
+    if current_emit_indent != 0:
+        sys.stderr.write(
+            f"ERROR:: include({fn!r}) cannot be called with non-zero current "
+            f"emit indent ({current_emit_indent}); move the include out of "
+            "the surrounding control block\n"
+        )
+        sys.exit(1)
+
     if fn.startswith("/"):
         exec_py += f'emit("{comment} begin file: {fn}\\n")\n'
         parse_file(fn, incl=True)
@@ -589,6 +602,14 @@ def include_file(fn):
 
 def pinclude_file(fn):
     global exec_py
+
+    if current_emit_indent != 0:
+        sys.stderr.write(
+            f"ERROR:: pinclude({fn!r}) cannot be called with non-zero current "
+            f"emit indent ({current_emit_indent}); move the pinclude out of "
+            "the surrounding control block\n"
+        )
+        sys.exit(1)
 
     if fn.startswith("/"):
         exec_py += f'emit("{comment} begin python file: {fn}\\n")\n'

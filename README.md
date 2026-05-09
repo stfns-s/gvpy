@@ -165,9 +165,23 @@ These functions are injected into the generated program's global scope, so they 
 
 Resolve a template parameter. Lookup order:
 
-1. `--defparam NAME=V` from the command line → returns `V` (string), prints `// parameter NAME => V (command line)`.
+1. `--defparam NAME=V` from the command line → returns `V`, prints `// parameter NAME => V (command line)`.
 2. The `val` keyword argument → returns `val`, prints `// parameter NAME => val (default value)`.
 3. Otherwise → returns `None`, prints `// parameter NAME => UNDEFINED`.
+
+`V` is parsed as a Python literal where possible (`ast.literal_eval`),
+otherwise kept as a string. So:
+
+| `--defparam` form         | Resulting value      |
+|---------------------------|----------------------|
+| `W=8`                      | `int 8`              |
+| `W=3.14`                   | `float 3.14`         |
+| `W=True`                   | `bool True`          |
+| `W=None`                   | `None`               |
+| `W='[1, 2, 3]'`            | `list [1, 2, 3]`     |
+| `W='"hello"'` (shell-quote the Python quotes) | `str "hello"` |
+| `W=hello` (no quotes)      | `str "hello"` (literal_eval rejects barewords; falls back to string) |
+| `W=2**8` (expression)      | `str "2**8"` (literal_eval rejects expressions; falls back to string) |
 
 The banner line uses the current `--comment` prefix. Both arguments are keyword-only.
 
@@ -247,6 +261,11 @@ Dict of `--defparam` values from the command line (raw strings, no type coercion
 
 - `include("file.vpy")` — preprocessed by gvpy; searched along `--incdirs`. Equivalent to inlining the file at this point.
 - `pinclude("file.py")` — raw Python, pasted verbatim into the generated program (no template processing).
+
+Both must be called at top-level in the template — i.e., outside any
+`//;` (or `{% %}`) control block. gvpy refuses the call with a clear
+error if the current emit indent is non-zero, since the included
+content's indentation would not match the surrounding block.
 
 ## Example
 

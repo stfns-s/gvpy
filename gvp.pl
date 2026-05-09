@@ -61,7 +61,7 @@ if ($rawperl) {
 			print $fh $ExecPerl;
 			close $fh;
 			printf STDERR "$prog: running \"perl -w $tmpfile\" for debug info:\n%s\n", '-' x 80;
-            system("perl -w $tmpfile");
+            system("perl", "-w", $tmpfile);
 			printf STDERR "%s\n", '-' x 80;
 		} else {
 			print STDERR "$prog: error could not write $tmpfile\n";
@@ -128,9 +128,9 @@ sub parseFile {
 
         $ln++;
 
-        if ($line =~ m/^\s*$PERL_ESC/ || (defined $PERL_ESC2 && $line =~ m/^\s*$PERL_ESC2/)) {
-            $line =~ s/^(\s*)$PERL_ESC/$1/g;
-            $line =~ s/^(\s*)$PERL_ESC2/$1/g if defined $PERL_ESC2;
+        if ($line =~ m/^\s*\Q$PERL_ESC\E/ || (defined $PERL_ESC2 && $line =~ m/^\s*\Q$PERL_ESC2\E/)) {
+            $line =~ s/^(\s*)\Q$PERL_ESC\E/$1/g;
+            $line =~ s/^(\s*)\Q$PERL_ESC2\E/$1/g if defined $PERL_ESC2;
 
             if ($line =~ s/^\s*pinclude\s*\(\s*(['"])([^'"]+)\1\s*\)//) {
                 pinclude($2);
@@ -231,7 +231,8 @@ sub initPerl {
     }
     $ExecPerl .= "my %parameters = (\n";
     foreach my $p (keys %defparams) {
-        $ExecPerl .= "\t$p\t=>\t$defparams{$p},\n";
+        (my $v = $defparams{$p}) =~ s/(['\\])/\\$1/g;
+        $ExecPerl .= "\t$p\t=>\t'$v',\n";
     }
     $ExecPerl .= "\t);\n\n";
     $ExecPerl .= "my \$comment=\"$comment\";\n\n";
@@ -267,7 +268,7 @@ sub pp {
     return sprintf $fmt, $num;
 }
 
-sub emit { printf @_; }
+sub emit { print @_; }
 
 my $self = {};
 bless $self;
