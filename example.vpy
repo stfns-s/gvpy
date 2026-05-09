@@ -38,7 +38,7 @@ module `mname()` #(
             stage_`pp(i)` <= '0;
 //;#end for
         end else begin
-            stage_0 <= data_in;
+            stage_`pp(0)` <= data_in;
 //;for i in range(1, DEPTH):
             stage_`pp(i)` <= stage_`pp(i-1)`;
 //;#endfor
@@ -70,10 +70,26 @@ module `mname()` #(
 //;sub = generate("submod", "u_sub_manual", WIDTH=WIDTH, MODE="fast")
     `sub.tname` /*WIDTH=`sub.params["WIDTH"]` MODE=`sub.params["MODE"]`*/ `sub.iname` (
         .clk(clk),
-        .rst_n(rst_n)
+        .rst_n(rst_n),
+        .din('0),
+        .dout()
     );
 
     // Literal backtick passthrough
     // escaped: \`not_an_expr\`
 
+endmodule
+
+// Stub for the submod referenced above so the example elaborates standalone.
+module submod #(
+    parameter WIDTH = 8,
+    parameter STAGE = 0,
+    parameter MODE  = "fast"
+) (
+    input  wire             clk,
+    input  wire             rst_n,
+    input  wire [WIDTH-1:0] din,
+    output wire [WIDTH-1:0] dout
+);
+    assign dout = din;
 endmodule

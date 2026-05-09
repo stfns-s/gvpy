@@ -127,7 +127,14 @@ Opt-in alternative spelling. Same semantics, different delimiters:
 | `` `expr` ``      | `{{ expr }}`        |
 | (n/a — use `//; #` Python comment) | `{# comment #}` (stripped) |
 
-Embedded code is full Python (no Jinja2 filters / tests / macros).
+Embedded code is full Python — `{% %}` and `{{ }}` accept any Python
+statement or expression (multi-line, dict literals, f-strings, comprehensions,
+arbitrary calls), not the Jinja2 expression sublanguage. In that sense `-j2`
+is **more general** than standard Jinja2: anything Python can do is in scope.
+The trade-off is that none of Jinja2's own features are wired up — no filters
+(`{{ x | upper }}`), no tests (`{% if x is defined %}`), no macros, no template
+inheritance. Whitespace-control modifiers `{%-`, `-%}`, `{{-`, `-}}` are
+accepted but treated as a syntactic no-op.
 
 - Each `{% %}` directive must start the line and nothing may follow `%}` on
   the same line.
@@ -135,7 +142,6 @@ Embedded code is full Python (no Jinja2 filters / tests / macros).
   `//;` convention: `{%     else: %}` is indent level 1.
 - Block close: either the existing sentinel comment form (`{% # endfor %}`)
   or the bare keyword (`{% endfor %}`, `{% endif %}`, `{% endwhile %}`).
-- Whitespace modifiers `{%-`, `-%}`, `{{-`, `-}}` are accepted as no-ops.
 - `\{{` produces a literal `{{` in plain text.
 - `{% %}` and `{{ }}` may span multiple physical lines (string- and
   bracket-aware close scan).
@@ -265,6 +271,7 @@ endmodule
 ```
 
 An example template covering most features lives in [`example.vpy`](example.vpy).
+The same template in `--jinja2` syntax is in [`example_j2.vpy`](example_j2.vpy).
 
 ## Debugging
 
