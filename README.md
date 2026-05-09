@@ -33,6 +33,7 @@ gvp.pl --defparam WIDTH=32 --mname my_module test.vp
 | `--libdirs d1,d2,...` | Prepended to `sys.path` before executing (repeatable, comma-split) |
 | `--comment STR` | Output-language comment prefix (default `//`); also enables `<STR>;` as an alternate escape |
 | `--rawpython` / `--pdebug` | Print generated Python source instead of executing (formatted with `black -l 140` if installed) |
+| `-j2`, `--jinja2` | Parse templates with Jinja2-shaped delimiters (see "Jinja2 syntax" below); python-only |
 
 Positional args are template files; multiple inputs are concatenated in order.
 
@@ -115,6 +116,40 @@ Lines starting with `` `timescale ``, `` `ifdef ``, `` `ifndef ``, `` `else ``, 
 //;include("submodule.vpy")   -- preprocessed by gvp; searched in --incdirs
 //;pinclude("helpers.py")    -- raw Python, pasted verbatim into the program
 ```
+
+## Jinja2 syntax (`--jinja2` / `-j2`, gvpy.py only)
+
+Opt-in alternative spelling. Same semantics, different delimiters:
+
+| Genesis (default) | Jinja2 (`--jinja2`) |
+|-------------------|---------------------|
+| `//; stmt`        | `{% stmt %}`        |
+| `` `expr` ``      | `{{ expr }}`        |
+| (n/a — use `//; #` Python comment) | `{# comment #}` (stripped) |
+
+Embedded code is full Python (no Jinja2 filters / tests / macros).
+
+- Each `{% %}` directive must start the line and nothing may follow `%}` on
+  the same line.
+- Indent goes *inside* the braces in 4-space units, matching the genesis
+  `//;` convention: `{%     else: %}` is indent level 1.
+- Block close: either the existing sentinel comment form (`{% # endfor %}`)
+  or the bare keyword (`{% endfor %}`, `{% endif %}`, `{% endwhile %}`).
+- Whitespace modifiers `{%-`, `-%}`, `{{-`, `-}}` are accepted as no-ops.
+- `\{{` produces a literal `{{` in plain text.
+- `{% %}` and `{{ }}` may span multiple physical lines (string- and
+  bracket-aware close scan).
+- The flag is global per invocation: `include()`d files inherit jinja2 mode.
+
+Example:
+
+```
+{% for i in range(4): %}
+  wire w_{{ i }};
+{% endfor %}
+```
+
+→ same output as the `//;` example above.
 
 ## Built-in helpers
 

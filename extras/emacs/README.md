@@ -7,7 +7,10 @@ Two major modes:
 
 Both derive from `verilog-mode` and use `mmm-mode` to layer the embedded
 language (`perl-mode` or `python-mode`) onto `//;` lines and backtick
-expressions.
+expressions. `genesispy-mode` additionally highlights the `--jinja2`
+delimiters `{% stmt %}`, `{% # ... %}` sentinel, and `{# ... #}` comment;
+`{{ expr }}` is left as plain Verilog to avoid clashes with brace-concat /
+replication patterns in non-jinja2 sources.
 
 ## Install
 

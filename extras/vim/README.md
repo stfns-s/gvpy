@@ -14,6 +14,10 @@ Highlights:
   excluding Verilog backtick directives (`` `timescale ``, `` `ifdef ``, ...).
 - Comment-only embedded lines (`//; # ...`) highlighted bold so they stand out
   from regular statements.
+- `--jinja2` delimiters in `genesispy` files: `{% stmt %}` (with `@pythonTop`),
+  `{% # ... %}` sentinel (bold-comment), and `{# ... #}` (comment). The
+  `{{ expr }}` form is intentionally left as plain Verilog to avoid colliding
+  with brace-concat / replication patterns in non-jinja2 sources.
 
 ## Install
 
