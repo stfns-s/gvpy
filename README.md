@@ -323,13 +323,8 @@ Add a case by creating a new numbered subdirectory.
 
 ## Editor support
 
-### Vim
-
-Syntax + ftdetect files for `.vpy` / `.gvpy` / `.vp` / `.svp` / `.vph` live in [`extras/vim/`](extras/vim/). See [`extras/vim/README.md`](extras/vim/README.md) for installation and configuration details.
-
-### Emacs
-
-`genesis2-mode` for `.vp` / `.svp` / `.vph` (Perl-templated Verilog) and `genesispy-mode` for `.vpy` / `.gvpy` (Python-templated variant) live in [`extras/emacs/`](extras/emacs/). See [`extras/emacs/README.md`](extras/emacs/README.md) for installation.
+Vim, Emacs, and VS Code support live in a separate repository:
+[stfns-s/genesis-editors](https://github.com/stfns-s/genesis-editors).
 
 ## Differences between gvpy.py and gvp.pl
 
