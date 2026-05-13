@@ -12,7 +12,7 @@ import re
 import subprocess
 import sys
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 prog = os.path.basename(sys.argv[0])
 

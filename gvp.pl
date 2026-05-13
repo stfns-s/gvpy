@@ -6,7 +6,7 @@ use FileHandle;
 use File::Basename;
 use Getopt::Long;
 
-our $VERSION = "0.2.0";
+our $VERSION = "0.2.1";
 
 # globals
 my $prog     = basename($0);

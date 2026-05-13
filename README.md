@@ -16,7 +16,7 @@ Both produce identical output on language-neutral inputs (literal pass-through, 
 
 ```bash
 gvpy.py test.vpy
-gvpy.py --defparam WIDTH=32 --mname my_module test.vpy
+gvpy.py -p WIDTH=32 --mname my_module test.vpy
 
 gvp.pl test.vp
 gvp.pl --defparam WIDTH=32 --mname my_module test.vp
@@ -24,16 +24,21 @@ gvp.pl --defparam WIDTH=32 --mname my_module test.vp
 
 ## CLI
 
+The table below is the gvpy.py CLI. `gvp.pl` uses the original names (`--libdirs`, `--incdirs`, `--defparam`) and lacks `-j2`.
+
 | Flag | Purpose |
 |------|---------|
 | `-h`, `--help` | Usage message |
+| `-v`, `--version` | Print version and exit |
 | `--mname NAME` | Top module name (default: stripped basename of input file) |
-| `--defparam K=V` | Set template parameter (repeatable) |
-| `--incdirs d1,d2,...` | Search path for `include`/`pinclude` (repeatable, comma-split) |
-| `--libdirs d1,d2,...` | Prepended to `sys.path` before executing (repeatable, comma-split) |
-| `--comment STR` | Output-language comment prefix (default `//`); also enables `<STR>;` as an alternate escape |
+| `-p`, `--parameter K=V` | Set template parameter (repeatable) |
+| `--inc-path d1,d2,...` | Search path for `include`/`pinclude` (repeatable, comma-split) |
+| `--py-path d1,d2,...` | Prepended to `sys.path` before executing (repeatable, comma-split) |
+| `--comment STR` | Output-language comment prefix (default `//`); also enables `<STR>;` as an alternate escape. Rejects empty/whitespace-only. |
 | `--rawpython` / `--pdebug` | Print generated Python source instead of executing (formatted with `black -l 140` if installed) |
 | `-j2`, `--j2` | Parse templates with Jinja2-shaped delimiters (see "Jinja2 syntax" below); python-only |
+
+The old `--libdirs`, `--incdirs`, `--defparam` names are still accepted as hidden deprecation aliases (one-time stderr warning), so existing command lines keep working.
 
 Positional args are template files; multiple inputs are concatenated in order.
 
@@ -113,7 +118,7 @@ Lines starting with `` `timescale ``, `` `ifdef ``, `` `ifndef ``, `` `else ``, 
 ### Includes
 
 ```
-//;include("submodule.vpy")   -- preprocessed by gvp; searched in --incdirs
+//;include("submodule.vpy")   -- preprocessed by gvp; searched in --inc-path
 //;pinclude("helpers.py")    -- raw Python, pasted verbatim into the program
 ```
 
@@ -165,14 +170,14 @@ These functions are injected into the generated program's global scope, so they 
 
 Resolve a template parameter. Lookup order:
 
-1. `--defparam NAME=V` from the command line → returns `V`, prints `// parameter NAME => V (command line)`.
+1. `-p NAME=V` / `--parameter NAME=V` from the command line → returns `V`, prints `// parameter NAME => V (command line)`.
 2. The `val` keyword argument → returns `val`, prints `// parameter NAME => val (default value)`.
 3. Otherwise → returns `None`, prints `// parameter NAME => UNDEFINED`.
 
 `V` is parsed as a Python literal where possible (`ast.literal_eval`),
 otherwise kept as a string. So:
 
-| `--defparam` form         | Resulting value      |
+| `-p` / `--parameter` form | Resulting value      |
 |---------------------------|----------------------|
 | `W=8`                      | `int 8`              |
 | `W=3.14`                   | `float 3.14`         |
@@ -255,11 +260,11 @@ The instance registry populated by `generate`: `self[tname][iname] -> _Inst`. It
 
 ### `parameters`
 
-Dict of `--defparam` values from the command line (raw strings, no type coercion). `parameter()` reads from this; you can also access it directly.
+Dict of `-p` / `--parameter` values from the command line (raw strings, no type coercion). `parameter()` reads from this; you can also access it directly.
 
 ### Includes
 
-- `include("file.vpy")` — preprocessed by gvpy; searched along `--incdirs`. Equivalent to inlining the file at this point.
+- `include("file.vpy")` — preprocessed by gvpy; searched along `--inc-path`. Equivalent to inlining the file at this point.
 - `pinclude("file.py")` — raw Python, pasted verbatim into the generated program (no template processing).
 
 Both must be called at top-level in the template — i.e., outside any
@@ -281,7 +286,7 @@ endmodule
 ```
 
 ```bash
-$ python3 gvpy.py --defparam DEPTH=2 shifter.vpy
+$ python3 gvpy.py -p DEPTH=2 shifter.vpy
 // parameter DEPTH => 2 (command line)
 module shifter (input clk, input [7:0] din, output [7:0] dout);
     reg [7:0] stage_00;
