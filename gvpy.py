@@ -12,6 +12,8 @@ import re
 import subprocess
 import sys
 
+__version__ = "0.2.0"
+
 prog = os.path.basename(sys.argv[0])
 
 # globals (mutable across parse_file / include / pinclude)
@@ -87,18 +89,20 @@ def synonym(*a, **kw):
 
 def usage():
     sys.stderr.write(
-        f"usage: {prog} [-h] [--libdirs dir] [--incdirs dir] [--defparam param=val] file(s)\n"
-        f"    -h, --help        : This message\n"
-        f"    --rawpython       : Output generated python source for debugging, rather than executing\n"
-        f"    --pdebug          : Alias for --rawpython\n"
-        f"    --mname  name     : Set top module name\n"
-        f"    --libdirs d1,d2,. : Add dirs to the lib path (sys.path)\n"
-        f'    --incdirs d1,d2,. : Add dirs to the include search path (used by {comment}; include("filename"))\n'
-        f"    --defparam p=v    : Set parameter 'p' to value 'v'\n"
-        f'    --comment str     : Set the comment start of output language to "str" (default "//").\n'
-        f'                        Note that this also adds the gvp escape to "str"; (default "//;")\n'
-        f"    -j2, --j2         : Parse templates with Jinja2 delimiters: '{{% stmt %}}',\n"
-        f"                        '{{{{ expr }}}}', '{{# comment #}}' (replaces //; and backticks)\n"
+        f"usage: {prog} [-h] [-v] [--py-path dir] [--inc-path dir] [-p param=val] file(s)\n"
+        f"    -h, --help         : This message\n"
+        f"    -v, --version      : Show version and exit\n"
+        f"    --rawpython        : Output generated python source for debugging, rather than executing\n"
+        f"    --pdebug           : Alias for --rawpython\n"
+        f"    --mname  name      : Set top module name\n"
+        f"    --py-path d1,d2,.  : Add dirs to the lib path (sys.path)\n"
+        f'    --inc-path d1,d2,. : Add dirs to the include search path (used by {comment}; include("filename"))\n'
+        f"    -p, --parameter p=v: Set parameter 'p' to value 'v' (may be repeated)\n"
+        f'    --comment str      : Set the comment start of output language to "str" (default "//").\n'
+        f'                         Note that this also adds the gvp escape to "str"; (default "//;")\n'
+        f"    -j2, --j2          : Parse templates with Jinja2 delimiters: '{{% stmt %}}',\n"
+        f"                         '{{{{ expr }}}}', '{{# comment #}}' (replaces //; and backticks)\n"
+        f"  Deprecated aliases (still accepted, hidden): --libdirs, --incdirs, --defparam.\n"
     )
 
 
@@ -631,24 +635,70 @@ def pinclude_file(fn):
     sys.exit(1)
 
 
+def _comment_arg(raw):
+    if not raw.strip():
+        raise argparse.ArgumentTypeError(
+            f"--comment {raw!r}: empty/whitespace-only comment prefix"
+        )
+    return raw
+
+
+class _DeprAppend(argparse.Action):
+    def __init__(self, option_strings, dest, new_flag, **kw):
+        self._new = new_flag
+        self._warned = False
+        super().__init__(option_strings, dest, **kw)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not self._warned:
+            sys.stderr.write(
+                f"{prog}: {option_string} is deprecated; use {self._new}\n"
+            )
+            self._warned = True
+        cur = getattr(namespace, self.dest, None)
+        if cur is None:
+            cur = []
+            setattr(namespace, self.dest, cur)
+        cur.append(values)
+
+
 def main():
     global comment, PY_ESC, PY_ESC2, rawpython, mname_arg, libdirs, incdirs, defparams, j2_mode
 
     parser = argparse.ArgumentParser(prog=prog, add_help=False)
     parser.add_argument("-h", "--help", action="store_true")
-    parser.add_argument("--libdirs", action="append", default=[])
-    parser.add_argument("--incdirs", action="append", default=[])
-    parser.add_argument("--defparam", action="append", default=[])
+    parser.add_argument(
+        "-v", "--version", action="version", version=f"gvpy {__version__}"
+    )
+    parser.add_argument("--py-path", dest="py_path", action="append", default=[])
+    parser.add_argument(
+        "--libdirs", dest="py_path", action=_DeprAppend, new_flag="--py-path",
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument("--inc-path", dest="inc_path", action="append", default=[])
+    parser.add_argument(
+        "--incdirs", dest="inc_path", action=_DeprAppend, new_flag="--inc-path",
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "-p", "--parameter", dest="parameter", action="append", default=[],
+        metavar="NAME=VALUE",
+    )
+    parser.add_argument(
+        "--defparam", dest="parameter", action=_DeprAppend,
+        new_flag="-p/--parameter", help=argparse.SUPPRESS,
+    )
     parser.add_argument("--rawpython", "--pdebug", action="store_true")
     parser.add_argument("--mname")
-    parser.add_argument("--comment", default="//")
+    parser.add_argument("--comment", default="//", type=_comment_arg)
     parser.add_argument("-j2", "--j2", action="store_true")
     parser.add_argument("files", nargs="*")
 
     try:
         args = parser.parse_args()
     except SystemExit as e:
-        usage()
+        if e.code not in (0, None):
+            usage()
         raise
 
     if args.help:
@@ -663,13 +713,13 @@ def main():
     j2_mode = args.j2
 
     libdirs = []
-    for entry in (args.libdirs or ["./"]):
+    for entry in (args.py_path or ["./"]):
         libdirs.extend(entry.split(","))
     incdirs = []
-    for entry in (args.incdirs or ["./"]):
+    for entry in (args.inc_path or ["./"]):
         incdirs.extend(entry.split(","))
     defparams = {}
-    for kv in args.defparam:
+    for kv in args.parameter:
         k, _, v = kv.partition("=")
         defparams[k] = v
 

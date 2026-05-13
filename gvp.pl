@@ -6,6 +6,8 @@ use FileHandle;
 use File::Basename;
 use Getopt::Long;
 
+our $VERSION = "0.2.0";
+
 # globals
 my $prog     = basename($0);
 my $comment  = "//";
@@ -15,6 +17,7 @@ my $rawperl   = 0;
 my $nobe     = 0;
 my $mname    ;
 my $help     = 0;
+my $version  = 0;
 my @libdirs  = ("./");
 my @incdirs  = ("./");
 my %defparams = ();
@@ -22,6 +25,7 @@ my $ExecPerl = "";
 
 my %opts = (
     "help"       => \$help,
+    "version|v"  => \$version,
     "libdirs=s"  => \@libdirs,
     "incdirs=s"  => \@incdirs,
     "defparam=s" => \%defparams,
@@ -32,6 +36,7 @@ my %opts = (
 );
 
 usage() and exit(1) if !GetOptions(%opts);
+print "gvp $VERSION\n" and exit(0) if $version;
 usage() and exit(0) if $help;
 
 
@@ -86,8 +91,9 @@ sub formatPerl {
 sub usage {
     my $prog     = basename($0);
     print << "_EOH_";
-usage: $prog [--h|--d] [--libdir dir] [--incdir dir] [--defparam param=val] file(s)
+usage: $prog [--h|--d] [-v] [--libdir dir] [--incdir dir] [--defparam param=val] file(s)
     --h              : This message
+    -v, --version    : Show version and exit
     --rawperl|pdebug : Output tidyed up raw perl for debugging, rather than target language
     --mname  name    : Set top module name
     --libdir d1,d2,. : Add dirs to the lib path (perl INC path),

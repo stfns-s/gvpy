@@ -1,0 +1,1 @@
+--libdirs is deprecated; use --py-path
